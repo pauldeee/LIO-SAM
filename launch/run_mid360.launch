@@ -1,0 +1,29 @@
+<launch>
+
+    <arg name="project" default="lio_sam"/>
+
+    <!-- Parameters -->
+    <rosparam file="$(find lio_sam)/config/params_mid360.yaml" command="load"/>
+
+    <!-- use complementary filter with built-in Livox IMU in place of a 9-axis imu-->
+    <node pkg="imu_complementary_filter" type="complementary_filter_node" name="complementary_filter_node">
+        <remap from="/imu/data_raw" to="/livox/imu"/>
+        <param name="use_mag" type="bool" value="false"/> <!-- Set to 'true' if you have magnetometer data -->
+        <param name="gain_acc" type="double" value="0.01"/> <!-- Accelerometer gain -->
+        <param name="gain_mag" type="double" value="0.01"/> <!-- Magnetometer gain -->
+        <param name="zeta" type="double" value="0.0"/> <!-- Bias estimation steady state gain -->
+    </node>
+
+    <!--- LOAM -->
+    <include file="$(find lio_sam)/launch/include/module_loam.launch"/>
+
+    <!--- Robot State TF -->
+    <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch"/>
+
+    <!--- Run Navsat -->
+    <include file="$(find lio_sam)/launch/include/module_navsat.launch"/>
+
+    <!--- Run Rviz-->
+    <include file="$(find lio_sam)/launch/include/module_rviz.launch"/>
+
+</launch>
